@@ -35,14 +35,15 @@ fn main() {
         ("core", vec!["core/types_c.h", "core/core.hpp" ]), // utility, base
         ("imgproc", vec![ "imgproc/types_c.h", "imgproc/imgproc_c.h",
                             "imgproc/imgproc.hpp" ]),
-        ("highgui", vec![   "highgui/cap_ios.h", "highgui/highgui.hpp",
-                            "highgui/highgui_c.h", "highgui/ios.h" ]),
+        ("highgui", vec![   "highgui/highgui.hpp",
+                            "highgui/highgui_c.h" ]),
         ("features2d", vec![ "features2d/features2d.hpp" ]),
         ("photo", vec!["photo/photo_c.h", "photo/photo.hpp" ]),
         ("video", vec![ "video/tracking.hpp", "video/video.hpp",
-                        "video/background_segm.hpp"]),
+                        "video/background_segm.hpp", "videoio/cap_ios.h"]),
         ("objdetect", vec![ "objdetect/objdetect.hpp" ]),
-        ("calib3d", vec![ "calib3d/calib3d.hpp"])
+        ("calib3d", vec![ "calib3d/calib3d.hpp"]),
+        ("imgcodecs", vec![ "imgcodecs/ios.h"]),
     ];
 
     let mut gcc = gcc::Config::new();
@@ -87,9 +88,12 @@ fn main() {
         gcc.file(entry.unwrap());
     }
 
-    gcc.cpp(true).include(".").include(&out_dir)
-        .flag("-Wno-c++11-extensions")
-        .compile("libocvrs.a");
+    let mut conf = gcc.cpp(true).include(".").include(&out_dir)
+        .flag("-std=c++11");
+    for inc in opencv.include_paths {
+        conf.include(inc);
+    }
+    conf.compile("libocvrs.a");
 
     for ref module in &modules {
         let e = Command::new("sh").current_dir(&out_dir).arg("-c").arg(
