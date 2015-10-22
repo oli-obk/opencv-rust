@@ -1545,12 +1545,12 @@ class RustWrapperGenerator(object):
 
         self.moduleCppCode.write(template("""
             // boxed class: $typeid
-            void cv_delete_$rust_local(void* instance) {
+            void cv_delete_$sane(void* instance) {
                 delete ($cpptype*) instance;
             }
             """).substitute(typ.__dict__))
 
-        self.moduleRustExterns.write("pub fn cv_delete_%s(ptr : *mut c_void);\n"%(typ.sane));
+        self.moduleRustExterns.write("#[doc(hidden)] pub fn cv_delete_%s(ptr : *mut c_void);\n"%(typ.sane));
 
         self.moduleSafeRust.write(template("""
             // boxed class $typeid
